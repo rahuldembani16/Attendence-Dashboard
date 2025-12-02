@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Users, Calendar, Settings, ArrowRight } from "lucide-react";
+import { Users, Calendar, Settings, ArrowRight, FileText } from "lucide-react";
 
 export default function AdminPage() {
     const cards = [
@@ -25,6 +25,13 @@ export default function AdminPage() {
             icon: Calendar,
             href: "/admin/holidays",
             color: "bg-green-50 text-green-600",
+        },
+        {
+            title: "Reports",
+            description: "Generate and download system reports.",
+            icon: FileText,
+            href: "/admin/reports",
+            color: "bg-orange-50 text-orange-600",
         },
     ];
 
