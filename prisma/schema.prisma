@@ -1,0 +1,65 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Department {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  users     User[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model User {
+  id           String       @id @default(uuid())
+  am           String       @unique
+  surname      String
+  name         String
+  departmentId String
+  department   Department   @relation(fields: [departmentId], references: [id])
+  attendance   Attendance[]
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+}
+
+model Category {
+  id          String       @id @default(uuid())
+  code        String       @unique // OS, T, OOO, BT
+  label       String       // On Site, Teleworking, etc.
+  color       String       // Tailwind class or hex
+  isWorkDay   Boolean      @default(true)
+  attendance  Attendance[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model Attendance {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date       DateTime // We'll store as midnight UTC
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+  notes      String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([userId, date])
+}
+
+model Holiday {
+  id          String   @id @default(uuid())
+  date        DateTime @unique
+  description String
+  isRecurring Boolean  @default(false) // For annual holidays like Christmas
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

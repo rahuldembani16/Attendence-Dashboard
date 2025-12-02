@@ -1,0 +1,142 @@
+"use client";
+
+import { useState } from "react";
+import { useApp } from "@/context/AppContext";
+import { User, Department } from "@/types";
+import { Trash2, Plus, ArrowLeft } from "lucide-react";
+import Link from "next/link";
+
+export function UserManagement() {
+    const { users, departments, addUser, deleteUser } = useApp();
+    const [newUser, setNewUser] = useState<Partial<User>>({
+        departmentId: "",
+    });
+
+    const handleAddUser = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (newUser.am && newUser.surname && newUser.name && newUser.departmentId) {
+            addUser({
+                am: newUser.am,
+                surname: newUser.surname,
+                name: newUser.name,
+                departmentId: newUser.departmentId,
+            });
+            setNewUser({ departmentId: "", am: "", surname: "", name: "" });
+        }
+    };
+
+    return (
+        <div className="space-y-6">
+            <div className="flex items-center gap-4">
+                <Link href="/admin" className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+                    <ArrowLeft className="h-5 w-5 text-gray-600" />
+                </Link>
+                <div>
+                    <h1 className="text-2xl font-bold text-gray-900">User Management</h1>
+                    <p className="text-gray-500">Add and manage employees.</p>
+                </div>
+            </div>
+
+            <div className="bg-white p-6 rounded-lg shadow-sm border">
+                <h2 className="text-lg font-semibold text-gray-800 mb-4">Add New Employee</h2>
+                <form onSubmit={handleAddUser} className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">AM</label>
+                        <input
+                            type="text"
+                            required
+                            value={newUser.am || ""}
+                            onChange={(e) => setNewUser({ ...newUser, am: e.target.value })}
+                            className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
+                            placeholder="e.g. 8818"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Surname</label>
+                        <input
+                            type="text"
+                            required
+                            value={newUser.surname || ""}
+                            onChange={(e) => setNewUser({ ...newUser, surname: e.target.value })}
+                            className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
+                            placeholder="Surname"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                        <input
+                            type="text"
+                            required
+                            value={newUser.name || ""}
+                            onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
+                            className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
+                            placeholder="Name"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Department</label>
+                        <select
+                            value={newUser.departmentId}
+                            onChange={(e) => setNewUser({ ...newUser, departmentId: e.target.value })}
+                            className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
+                            required
+                        >
+                            <option value="">Select Dept</option>
+                            {departments.map((dept) => (
+                                <option key={dept.id} value={dept.id}>
+                                    {dept.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                    <button
+                        type="submit"
+                        className="flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
+                    >
+                        <Plus className="h-4 w-4" />
+                        Add User
+                    </button>
+                </form>
+            </div>
+
+            <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
+                <table className="w-full text-sm text-left">
+                    <thead className="bg-gray-50 text-gray-700 font-medium border-b">
+                        <tr>
+                            <th className="p-4">AM</th>
+                            <th className="p-4">Surname</th>
+                            <th className="p-4">Name</th>
+                            <th className="p-4">Department</th>
+                            <th className="p-4 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y">
+                        {users.map((user) => (
+                            <tr key={user.id} className="hover:bg-gray-50">
+                                <td className="p-4 font-medium">{user.am}</td>
+                                <td className="p-4">{user.surname}</td>
+                                <td className="p-4">{user.name}</td>
+                                <td className="p-4">{user.department?.name}</td>
+                                <td className="p-4 text-right">
+                                    <button
+                                        onClick={() => deleteUser(user.id)}
+                                        className="text-red-600 hover:text-red-800 p-2 hover:bg-red-50 rounded-full transition-colors"
+                                    >
+                                        <Trash2 className="h-4 w-4" />
+                                    </button>
+                                </td>
+                            </tr>
+                        ))}
+                        {users.length === 0 && (
+                            <tr>
+                                <td colSpan={5} className="p-8 text-center text-gray-500">
+                                    No users found. Add one above.
+                                </td>
+                            </tr>
+                        )}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    );
+}
