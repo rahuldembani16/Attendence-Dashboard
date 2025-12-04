@@ -1,5 +1,6 @@
+import Image from "next/image";
 import Link from "next/link";
-import { LayoutDashboard, Users, Calendar, UserCircle } from "lucide-react";
+import { Users, Calendar, UserCircle } from "lucide-react";
 
 export function Navbar() {
     return (
@@ -7,10 +8,14 @@ export function Navbar() {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between h-16 items-center">
                     <div className="flex items-center gap-2">
-                        <LayoutDashboard className="h-6 w-6 text-blue-600" />
-                        <span className="font-bold text-xl bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
-                            SingularLogic
-                        </span>
+                        <Image
+                            src="/logo.png"
+                            alt="SingularLogic Logo"
+                            width={180}
+                            height={40}
+                            className="h-10 w-auto object-contain"
+                            priority
+                        />
                     </div>
                     <div className="flex gap-6">
                         <Link
