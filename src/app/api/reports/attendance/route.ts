@@ -72,7 +72,7 @@ export async function GET(request: Request) {
 
         // 4. Define Columns
         const columns = [
-            { header: "AM", key: "am", width: 10 },
+            { header: "ID", key: "am", width: 10 },
             { header: "Surname", key: "surname", width: 20 },
             { header: "Name", key: "name", width: 20 },
             { header: "Department", key: "department", width: 15 },

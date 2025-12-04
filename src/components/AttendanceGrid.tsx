@@ -89,7 +89,7 @@ export function AttendanceGrid({ currentDate, setCurrentDate }: AttendanceGridPr
                 <table className="w-full text-sm text-left">
                     <thead className="bg-gray-50 text-gray-700 font-medium border-b">
                         <tr>
-                            <th className="p-3 min-w-[80px] sticky left-0 bg-gray-50 z-10 border-r">AM</th>
+                            <th className="p-3 min-w-[80px] sticky left-0 bg-gray-50 z-10 border-r">ID</th>
                             <th className="p-3 min-w-[120px] sticky left-[80px] bg-gray-50 z-10 border-r">Surname</th>
                             <th className="p-3 min-w-[120px] sticky left-[200px] bg-gray-50 z-10 border-r">Name</th>
                             <th className="p-3 min-w-[80px] border-r">Dept</th>

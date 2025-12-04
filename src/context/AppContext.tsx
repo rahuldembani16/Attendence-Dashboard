@@ -11,6 +11,7 @@ interface AppContextType {
     holidays: Holiday[];
     departments: Department[];
     addUser: (user: Partial<User>) => Promise<void>;
+    updateUser: (user: Partial<User>) => Promise<void>;
     deleteUser: (id: string) => Promise<void>;
     updateAttendance: (record: Partial<AttendanceRecord>) => Promise<void>;
     getAttendance: (userId: string, date: string) => string | undefined;
@@ -86,6 +87,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
                 body: JSON.stringify(user),
             });
             if (!res.ok) throw new Error("Failed to add user");
+            return res.json();
+        },
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ["users"] }),
+    });
+
+    const updateUserMutation = useMutation({
+        mutationFn: async (user: Partial<User>) => {
+            const res = await fetch("/api/users", {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(user),
+            });
+            if (!res.ok) throw new Error("Failed to update user");
             return res.json();
         },
         onSuccess: () => queryClient.invalidateQueries({ queryKey: ["users"] }),
@@ -187,6 +201,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
                 holidays,
                 departments,
                 addUser: addUserMutation.mutateAsync,
+                updateUser: updateUserMutation.mutateAsync,
                 deleteUser: deleteUserMutation.mutateAsync,
                 updateAttendance: updateAttendanceMutation.mutateAsync,
                 getAttendance,
