@@ -5,13 +5,13 @@ import { useParams, useRouter } from "next/navigation";
 import { useApp } from "@/context/AppContext";
 import { format, eachDayOfInterval, startOfMonth, endOfMonth, isWeekend } from "date-fns";
 import { cn } from "@/lib/utils";
-import { ChevronLeft, ArrowLeft } from "lucide-react";
+import { ChevronLeft, ChevronRight, ArrowLeft } from "lucide-react";
 
 export default function UserAttendancePage() {
     const params = useParams();
     const router = useRouter();
     const { users, categories, holidays, getAttendance, updateAttendance } = useApp();
-    const [currentDate] = useState(new Date(2025, 11, 1)); // Dec 2025
+    const [currentDate, setCurrentDate] = useState(new Date());
 
     const user = users.find((u) => u.id === params.id);
 
@@ -40,6 +40,21 @@ export default function UserAttendancePage() {
     };
 
     const isBlocked = (date: Date) => {
+        // Check employment dates
+        const dateStr = format(date, "yyyy-MM-dd");
+        const checkDate = new Date(dateStr);
+        const startDate = new Date(user.startDate);
+        // Normalize start date to midnight
+        startDate.setHours(0, 0, 0, 0);
+
+        if (checkDate < startDate) return true;
+
+        if (user.endDate) {
+            const endDate = new Date(user.endDate);
+            endDate.setHours(0, 0, 0, 0);
+            if (checkDate > endDate) return true;
+        }
+
         return isWeekend(date) || isHoliday(date);
     };
 
@@ -67,20 +82,36 @@ export default function UserAttendancePage() {
 
     return (
         <div className="space-y-8">
-            <div className="flex items-center gap-4">
-                <button
-                    onClick={() => router.push("/portal")}
-                    className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-                >
-                    <ArrowLeft className="h-5 w-5 text-gray-600" />
-                </button>
-                <div>
-                    <h1 className="text-2xl font-bold text-gray-900">
-                        {user.surname} {user.name}
-                    </h1>
-                    <p className="text-gray-500">
-                        {user.department?.name} • AM: {user.am} • {format(currentDate, "MMMM yyyy")}
-                    </p>
+            <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                    <button
+                        onClick={() => router.push("/portal")}
+                        className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                    >
+                        <ArrowLeft className="h-5 w-5 text-gray-600" />
+                    </button>
+                    <div>
+                        <h1 className="text-2xl font-bold text-gray-900">
+                            {user.surname} {user.name}
+                        </h1>
+                        <p className="text-gray-500">
+                            {user.department?.name} • AM: {user.am} • {format(currentDate, "MMMM yyyy")}
+                        </p>
+                    </div>
+                </div>
+                <div className="flex gap-2">
+                    <button
+                        onClick={() => setCurrentDate(new Date(currentDate.setMonth(currentDate.getMonth() - 1)))}
+                        className="p-2 hover:bg-gray-100 rounded-full border shadow-sm"
+                    >
+                        <ChevronLeft className="h-5 w-5 text-gray-600" />
+                    </button>
+                    <button
+                        onClick={() => setCurrentDate(new Date(currentDate.setMonth(currentDate.getMonth() + 1)))}
+                        className="p-2 hover:bg-gray-100 rounded-full border shadow-sm"
+                    >
+                        <ChevronRight className="h-5 w-5 text-gray-600" />
+                    </button>
                 </div>
             </div>
 

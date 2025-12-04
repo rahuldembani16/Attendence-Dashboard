@@ -16,7 +16,7 @@ export function UserManagement() {
 
     const handleAddUser = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (newUser.surname && newUser.name && newUser.departmentId) {
+        if (newUser.surname && newUser.name && newUser.departmentId && newUser.startDate) {
             if (isEditing && newUser.id) {
                 await updateUser({
                     id: newUser.id,
@@ -24,6 +24,8 @@ export function UserManagement() {
                     surname: newUser.surname,
                     name: newUser.name,
                     departmentId: newUser.departmentId,
+                    startDate: newUser.startDate,
+                    endDate: newUser.endDate,
                 });
                 setIsEditing(false);
             } else {
@@ -32,9 +34,11 @@ export function UserManagement() {
                     surname: newUser.surname,
                     name: newUser.name,
                     departmentId: newUser.departmentId,
+                    startDate: newUser.startDate,
+                    endDate: newUser.endDate,
                 });
             }
-            setNewUser({ departmentId: "", am: "", surname: "", name: "" });
+            setNewUser({ departmentId: "", am: "", surname: "", name: "", startDate: "", endDate: "" });
         }
     };
 
@@ -45,12 +49,14 @@ export function UserManagement() {
             surname: user.surname,
             name: user.name,
             departmentId: user.departmentId,
+            startDate: user.startDate,
+            endDate: user.endDate,
         });
         setIsEditing(true);
     };
 
     const handleCancelEdit = () => {
-        setNewUser({ departmentId: "", am: "", surname: "", name: "" });
+        setNewUser({ departmentId: "", am: "", surname: "", name: "", startDate: "", endDate: "" });
         setIsEditing(false);
     };
 
@@ -121,6 +127,25 @@ export function UserManagement() {
                             ))}
                         </select>
                     </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+                        <input
+                            type="date"
+                            required
+                            value={newUser.startDate ? newUser.startDate.split('T')[0] : ""}
+                            onChange={(e) => setNewUser({ ...newUser, startDate: e.target.value })}
+                            className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+                        <input
+                            type="date"
+                            value={newUser.endDate ? newUser.endDate.split('T')[0] : ""}
+                            onChange={(e) => setNewUser({ ...newUser, endDate: e.target.value })}
+                            className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
+                        />
+                    </div>
                     <div className="flex gap-2">
                         <button
                             type="submit"
@@ -149,6 +174,8 @@ export function UserManagement() {
                             <th className="p-4">Surname</th>
                             <th className="p-4">Name</th>
                             <th className="p-4">Department</th>
+                            <th className="p-4">Start Date</th>
+                            <th className="p-4">End Date</th>
                             <th className="p-4 text-right">Actions</th>
                         </tr>
                     </thead>
@@ -159,6 +186,12 @@ export function UserManagement() {
                                 <td className="p-4">{user.surname}</td>
                                 <td className="p-4">{user.name}</td>
                                 <td className="p-4">{user.department?.name}</td>
+                                <td className="p-4 text-gray-600">
+                                    {user.startDate ? new Date(user.startDate).toLocaleDateString() : "-"}
+                                </td>
+                                <td className="p-4 text-gray-600">
+                                    {user.endDate ? new Date(user.endDate).toLocaleDateString() : "-"}
+                                </td>
                                 <td className="p-4 text-right">
                                     <div className="flex justify-end gap-2">
                                         <button

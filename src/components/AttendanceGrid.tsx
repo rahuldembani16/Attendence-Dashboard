@@ -124,14 +124,32 @@ export function AttendanceGrid({ currentDate, setCurrentDate }: AttendanceGridPr
                                     const dateStr = format(day, "yyyy-MM-dd");
                                     const code = getAttendance(user.id, dateStr);
                                     const category = categories.find(c => c.code === code);
-                                    const isDayBlocked = isBlocked(day);
+
+                                    // Check employment dates
+                                    const dayDate = new Date(dateStr);
+                                    const startDate = new Date(user.startDate);
+                                    startDate.setHours(0, 0, 0, 0);
+
+                                    let isEmploymentBlocked = false;
+                                    if (dayDate < startDate) {
+                                        isEmploymentBlocked = true;
+                                    } else if (user.endDate) {
+                                        const endDate = new Date(user.endDate);
+                                        endDate.setHours(0, 0, 0, 0);
+                                        if (dayDate > endDate) {
+                                            isEmploymentBlocked = true;
+                                        }
+                                    }
+
+                                    const isDayBlocked = isBlocked(day) || isEmploymentBlocked;
 
                                     return (
                                         <td
                                             key={dateStr}
                                             className={cn(
                                                 "p-1 text-center border-r transition-colors",
-                                                isDayBlocked ? "bg-gray-200 cursor-not-allowed" : "cursor-pointer hover:bg-gray-100"
+                                                isDayBlocked ? "bg-gray-200 cursor-not-allowed" : "cursor-pointer hover:bg-gray-100",
+                                                isEmploymentBlocked && "bg-gray-300" // Darker gray for employment blocked
                                             )}
                                             onClick={() => !isDayBlocked && handleStatusClick(user.id, dateStr)}
                                         >
@@ -186,6 +204,6 @@ export function AttendanceGrid({ currentDate, setCurrentDate }: AttendanceGridPr
                     </div>
                 ))}
             </div>
-        </div>
+        </div >
     );
 }

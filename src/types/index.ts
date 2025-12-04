@@ -12,9 +12,9 @@ export type User = {
     name: string;
     department: Department;
     departmentId: string;
+    startDate: string;
+    endDate?: string;
 };
-
-export type AttendanceStatus = string; // Changed from union to string to support dynamic categories
 
 export type Category = {
     id: string;

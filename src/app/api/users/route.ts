@@ -16,7 +16,7 @@ export async function GET() {
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { surname, name, departmentId } = body;
+        const { surname, name, departmentId, startDate, endDate } = body;
 
         // Find the highest current AM (ID)
         const users = await prisma.user.findMany({
@@ -39,6 +39,8 @@ export async function POST(request: Request) {
                 surname,
                 name,
                 departmentId,
+                startDate: startDate ? new Date(startDate) : new Date(),
+                endDate: endDate ? new Date(endDate) : null,
             },
         });
         return NextResponse.json(user);
@@ -68,7 +70,7 @@ export async function DELETE(request: Request) {
 export async function PATCH(request: Request) {
     try {
         const body = await request.json();
-        const { id, am, surname, name, departmentId } = body;
+        const { id, am, surname, name, departmentId, startDate, endDate } = body;
 
         if (!id) {
             return NextResponse.json({ error: "ID is required" }, { status: 400 });
@@ -81,6 +83,8 @@ export async function PATCH(request: Request) {
                 surname,
                 name,
                 departmentId,
+                startDate: startDate ? new Date(startDate) : undefined,
+                endDate: endDate ? new Date(endDate) : null,
             },
         });
         return NextResponse.json(user);
