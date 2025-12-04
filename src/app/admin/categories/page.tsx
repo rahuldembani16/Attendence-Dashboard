@@ -3,16 +3,17 @@
 import { useState } from "react";
 import { useApp } from "@/context/AppContext";
 import { Category } from "@/types";
-import { Trash2, Plus, ArrowLeft } from "lucide-react";
+import { Trash2, Plus, ArrowLeft, Check, X } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 export default function CategoriesPage() {
-    const { categories, addCategory, deleteCategory } = useApp();
+    const { categories, addCategory, deleteCategory, toggleCategoryStatus } = useApp();
     const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
     const [newCategory, setNewCategory] = useState<Partial<Category>>({
         color: "bg-gray-100 text-gray-800 border-gray-200",
         isWorkDay: true,
+        isActive: true,
     });
 
     const handleAdd = (e: React.FormEvent) => {
@@ -24,7 +25,17 @@ export default function CategoriesPage() {
                 label: "",
                 color: "bg-gray-100 text-gray-800 border-gray-200",
                 isWorkDay: true,
+                isActive: true,
             });
+        }
+    };
+
+    const toggleStatus = async (id: string, currentStatus: boolean) => {
+        try {
+            await toggleCategoryStatus(id, !currentStatus);
+        } catch (error) {
+            console.error(error);
+            alert("Failed to update category status");
         }
     };
 
@@ -63,8 +74,8 @@ export default function CategoriesPage() {
 
             <div className="bg-white p-6 rounded-lg shadow-sm border">
                 <h2 className="text-lg font-semibold text-gray-800 mb-4">Add New Category</h2>
-                <form onSubmit={handleAdd} className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
-                    <div>
+                <form onSubmit={handleAdd} className="grid grid-cols-1 md:grid-cols-6 gap-4 items-end">
+                    <div className="md:col-span-1">
                         <label className="block text-sm font-medium text-gray-700 mb-1">Code</label>
                         <input
                             type="text"
@@ -75,7 +86,7 @@ export default function CategoriesPage() {
                             placeholder="e.g. WFH"
                         />
                     </div>
-                    <div>
+                    <div className="md:col-span-2">
                         <label className="block text-sm font-medium text-gray-700 mb-1">Label</label>
                         <input
                             type="text"
@@ -86,7 +97,7 @@ export default function CategoriesPage() {
                             placeholder="e.g. Work From Home"
                         />
                     </div>
-                    <div>
+                    <div className="md:col-span-2">
                         <label className="block text-sm font-medium text-gray-700 mb-1">Color</label>
                         <div className="grid grid-cols-6 gap-2">
                             {colorOptions.map((opt) => (
@@ -107,21 +118,35 @@ export default function CategoriesPage() {
                         </div>
                         <p className="text-xs text-gray-500 mt-1">Select a color for the category badge.</p>
                     </div>
-                    <div className="flex items-center pb-3">
-                        <input
-                            type="checkbox"
-                            id="isWorkDay"
-                            checked={newCategory.isWorkDay}
-                            onChange={(e) => setNewCategory({ ...newCategory, isWorkDay: e.target.checked })}
-                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                        />
-                        <label htmlFor="isWorkDay" className="ml-2 block text-sm text-gray-900">
-                            Is Work Day?
-                        </label>
+                    <div className="flex flex-col gap-2 pb-2">
+                        <div className="flex items-center">
+                            <input
+                                type="checkbox"
+                                id="isWorkDay"
+                                checked={newCategory.isWorkDay}
+                                onChange={(e) => setNewCategory({ ...newCategory, isWorkDay: e.target.checked })}
+                                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                            />
+                            <label htmlFor="isWorkDay" className="ml-2 block text-sm text-gray-900">
+                                Is Work Day?
+                            </label>
+                        </div>
+                        <div className="flex items-center">
+                            <input
+                                type="checkbox"
+                                id="isActive"
+                                checked={newCategory.isActive}
+                                onChange={(e) => setNewCategory({ ...newCategory, isActive: e.target.checked })}
+                                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                            />
+                            <label htmlFor="isActive" className="ml-2 block text-sm text-gray-900">
+                                Active
+                            </label>
+                        </div>
                     </div>
                     <button
                         type="submit"
-                        className="flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
+                        className="flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors h-10"
                     >
                         <Plus className="h-4 w-4" />
                         Add
@@ -137,6 +162,7 @@ export default function CategoriesPage() {
                             <th className="p-4">Code</th>
                             <th className="p-4">Label</th>
                             <th className="p-4">Type</th>
+                            <th className="p-4">Status</th>
                             <th className="p-4 text-right">Actions</th>
                         </tr>
                     </thead>
@@ -165,6 +191,27 @@ export default function CategoriesPage() {
                                             Absence
                                         </span>
                                     )}
+                                </td>
+                                <td className="p-4">
+                                    <button
+                                        onClick={() => toggleStatus(cat.id, cat.isActive)}
+                                        className={cn(
+                                            "inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium transition-colors",
+                                            cat.isActive
+                                                ? "bg-blue-100 text-blue-800 hover:bg-blue-200"
+                                                : "bg-gray-100 text-gray-800 hover:bg-gray-200"
+                                        )}
+                                    >
+                                        {cat.isActive ? (
+                                            <>
+                                                <Check className="w-3 h-3" /> Active
+                                            </>
+                                        ) : (
+                                            <>
+                                                <X className="w-3 h-3" /> Inactive
+                                            </>
+                                        )}
+                                    </button>
                                 </td>
                                 <td className="p-4 text-right">
                                     <div className="flex justify-end">

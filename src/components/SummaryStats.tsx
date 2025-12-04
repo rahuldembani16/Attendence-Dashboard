@@ -20,7 +20,9 @@ export function SummaryStats({ currentDate }: SummaryStatsProps) {
     });
 
     // Calculate stats for the whole month
-    const stats = categories.map(category => {
+    const activeCategories = categories.filter(c => c.isActive !== false);
+
+    const stats = activeCategories.map(category => {
         let count = 0;
         users.forEach(user => {
             daysInMonth.forEach(day => {

@@ -14,6 +14,9 @@ interface AttendanceGridProps {
 export function AttendanceGrid({ currentDate, setCurrentDate }: AttendanceGridProps) {
     const { users, categories, holidays, getAttendance, updateAttendance } = useApp();
 
+    // Filter active categories for selection and legend
+    const activeCategories = categories.filter(c => c.isActive !== false); // Handle undefined as true for legacy
+
     const daysInMonth = eachDayOfInterval({
         start: startOfMonth(currentDate),
         end: endOfMonth(currentDate),
@@ -30,26 +33,33 @@ export function AttendanceGrid({ currentDate, setCurrentDate }: AttendanceGridPr
 
     const handleStatusClick = (userId: string, date: string) => {
         const currentCode = getAttendance(userId, date);
-        const currentCategory = categories.find(c => c.code === currentCode);
 
-        // Find next category
+        // Find next category from ACTIVE categories only
         let nextCategory;
         if (!currentCode) {
-            // Default to "On Site" (OS) if available, otherwise first category
-            nextCategory = categories.find(c => c.code === "OS") || categories[0];
+            // Default to "On Site" (OS) if available and active, otherwise first active category
+            nextCategory = activeCategories.find(c => c.code === "OS") || activeCategories[0];
         } else {
-            const currentIndex = categories.findIndex(c => c.code === currentCode);
-            const nextIndex = (currentIndex + 1) % (categories.length + 1);
-            nextCategory = nextIndex < categories.length ? categories[nextIndex] : undefined;
+            const currentIndex = activeCategories.findIndex(c => c.code === currentCode);
+
+            if (currentIndex === -1) {
+                // Current category is inactive or not found, start over with first active
+                nextCategory = activeCategories[0];
+            } else {
+                const nextIndex = (currentIndex + 1) % (activeCategories.length + 1);
+                nextCategory = nextIndex < activeCategories.length ? activeCategories[nextIndex] : undefined;
+            }
         }
 
         if (nextCategory) {
             updateAttendance({ userId, date, categoryId: nextCategory.id });
         } else {
-            // Clear status (optional, or cycle back to first)
-            // For now, let's cycle back to first if we want to allow clearing, or just loop
-            // Implementation choice: Loop back to first
-            updateAttendance({ userId, date, categoryId: categories[0].id });
+            // Clear status (cycle to empty)
+            // If we want to loop back to start immediately without empty state:
+            // updateAttendance({ userId, date, categoryId: activeCategories[0].id });
+
+            // Current implementation: Allow clearing (undefined)
+            updateAttendance({ userId, date, categoryId: activeCategories[0].id });
         }
     };
 
@@ -162,7 +172,7 @@ export function AttendanceGrid({ currentDate, setCurrentDate }: AttendanceGridPr
             </div>
 
             <div className="flex gap-4 flex-wrap">
-                {categories.map((category) => (
+                {activeCategories.map((category) => (
                     <div key={category.id} className="flex items-center gap-2">
                         <div
                             className={cn(

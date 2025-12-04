@@ -16,6 +16,7 @@ interface AppContextType {
     getAttendance: (userId: string, date: string) => string | undefined;
     addCategory: (category: Partial<Category>) => Promise<void>;
     deleteCategory: (id: string) => Promise<void>;
+    toggleCategoryStatus: (id: string, isActive: boolean) => Promise<void>;
     addHoliday: (holiday: Partial<Holiday>) => Promise<void>;
     deleteHoliday: (id: string) => Promise<void>;
     isLoading: boolean;
@@ -135,6 +136,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         onSuccess: () => queryClient.invalidateQueries({ queryKey: ["categories"] }),
     });
 
+    const toggleCategoryStatusMutation = useMutation({
+        mutationFn: async ({ id, isActive }: { id: string; isActive: boolean }) => {
+            const res = await fetch("/api/categories/toggle", {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ id, isActive }),
+            });
+            if (!res.ok) throw new Error("Failed to update category status");
+            return res.json();
+        },
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ["categories"] }),
+    });
+
     const addHolidayMutation = useMutation({
         mutationFn: async (holiday: Partial<Holiday>) => {
             const res = await fetch("/api/holidays", {
@@ -178,6 +192,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
                 getAttendance,
                 addCategory: addCategoryMutation.mutateAsync,
                 deleteCategory: deleteCategoryMutation.mutateAsync,
+                toggleCategoryStatus: (id, isActive) => toggleCategoryStatusMutation.mutateAsync({ id, isActive }),
                 addHoliday: addHolidayMutation.mutateAsync,
                 deleteHoliday: deleteHolidayMutation.mutateAsync,
                 isLoading: usersLoading || attendanceLoading || categoriesLoading || holidaysLoading || departmentsLoading,

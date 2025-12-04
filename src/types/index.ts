@@ -22,6 +22,7 @@ export type Category = {
     label: string;
     color: string;
     isWorkDay: boolean;
+    isActive: boolean;
 };
 
 export type AttendanceRecord = {

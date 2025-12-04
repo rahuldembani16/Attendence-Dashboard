@@ -22,7 +22,7 @@ export default function ReportsPage() {
                 const response = await fetch("/api/categories");
                 if (response.ok) {
                     const data = await response.json();
-                    setCategories(data);
+                    setCategories(data.filter((c: any) => c.isActive !== false));
                 }
             } catch (error) {
                 console.error("Failed to fetch categories:", error);

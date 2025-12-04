@@ -15,7 +15,7 @@ export async function GET() {
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { code, label, color, isWorkDay } = body;
+        const { code, label, color, isWorkDay, isActive } = body;
 
         const category = await prisma.category.create({
             data: {
@@ -23,6 +23,7 @@ export async function POST(request: Request) {
                 label,
                 color,
                 isWorkDay,
+                isActive,
             },
         });
         return NextResponse.json(category);
