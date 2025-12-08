@@ -11,7 +11,6 @@ export default function Home() {
     <div className="space-y-8">
       <div className="flex flex-col gap-2">
         <h1 className="text-3xl font-bold text-gray-900">Department Attendance</h1>
-        <p className="text-gray-500">Manage and view employee attendance for the current month.</p>
       </div>
       <SummaryStats currentDate={currentDate} />
       <AttendanceGrid currentDate={currentDate} setCurrentDate={setCurrentDate} />
