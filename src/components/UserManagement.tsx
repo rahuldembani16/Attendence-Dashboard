@@ -20,7 +20,7 @@ export function UserManagement() {
         e.preventDefault();
         if (newUser.surname && newUser.name && newUser.departmentId && newUser.startDate) {
             if (isEditing && newUser.id) {
-                await updateUser({
+                const updateData: Partial<User> = {
                     id: newUser.id,
                     am: newUser.am, // Keep existing AM
                     surname: newUser.surname,
@@ -28,7 +28,14 @@ export function UserManagement() {
                     departmentId: newUser.departmentId,
                     startDate: newUser.startDate,
                     endDate: newUser.endDate,
-                });
+                    username: newUser.username,
+                    isAdmin: newUser.isAdmin,
+                };
+                // Only send password if it has been changed (non-empty)
+                if (newUser.password) {
+                    updateData.password = newUser.password;
+                }
+                await updateUser(updateData);
                 setIsEditing(false);
             } else {
                 await addUser({
@@ -38,6 +45,9 @@ export function UserManagement() {
                     departmentId: newUser.departmentId,
                     startDate: newUser.startDate,
                     endDate: newUser.endDate,
+                    username: newUser.username,
+                    password: newUser.password,
+                    isAdmin: newUser.isAdmin,
                 });
             }
             setNewUser({ departmentId: "", am: "", surname: "", name: "", startDate: "", endDate: "" });
@@ -53,6 +63,10 @@ export function UserManagement() {
             departmentId: user.departmentId,
             startDate: user.startDate,
             endDate: user.endDate,
+            username: user.username,
+            isAdmin: user.isAdmin,
+            // Do not pre-fill password to allow "leave blank to keep" logic
+            password: "",
         });
         setIsEditing(true);
     };
@@ -85,132 +99,136 @@ export function UserManagement() {
                 <h2 className="text-lg font-semibold text-gray-800 mb-4">
                     {isEditing ? "Edit Employee" : "Add New Employee"}
                 </h2>
-                <form onSubmit={handleAddUser} className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
-                    {isEditing && (
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">ID</label>
-                            <input
-                                type="text"
-                                required
-                                disabled
-                                value={newUser.am || ""}
-                                className="w-full rounded-md border-gray-300 shadow-sm bg-gray-100 text-gray-500 cursor-not-allowed border p-2"
-                            />
+                <form onSubmit={handleAddUser} className="space-y-6">
+                    {/* Personal & Job Details */}
+                    <div>
+                        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Surname</label>
+                                <input
+                                    type="text"
+                                    required
+                                    value={newUser.surname || ""}
+                                    onChange={(e) => setNewUser({ ...newUser, surname: e.target.value })}
+                                    className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
+                                    placeholder="Surname"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                                <input
+                                    type="text"
+                                    required
+                                    value={newUser.name || ""}
+                                    onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
+                                    className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
+                                    placeholder="Name"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Department</label>
+                                <select
+                                    value={newUser.departmentId}
+                                    onChange={(e) => setNewUser({ ...newUser, departmentId: e.target.value })}
+                                    className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
+                                    required
+                                >
+                                    <option value="">Select Dept</option>
+                                    {departments.map((dept) => (
+                                        <option key={dept.id} value={dept.id}>
+                                            {dept.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+                                <input
+                                    type="date"
+                                    required
+                                    value={newUser.startDate ? newUser.startDate.split('T')[0] : ""}
+                                    onChange={(e) => setNewUser({ ...newUser, startDate: e.target.value })}
+                                    className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+                                <input
+                                    type="date"
+                                    value={newUser.endDate ? newUser.endDate.split('T')[0] : ""}
+                                    onChange={(e) => setNewUser({ ...newUser, endDate: e.target.value })}
+                                    className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
+                                />
+                            </div>
                         </div>
-                    )}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Surname</label>
-                        <input
-                            type="text"
-                            required
-                            value={newUser.surname || ""}
-                            onChange={(e) => setNewUser({ ...newUser, surname: e.target.value })}
-                            className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
-                            placeholder="Surname"
-                        />
                     </div>
+
+                    {/* Account Credentials */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
-                        <input
-                            type="text"
-                            value={newUser.username || ""}
-                            onChange={(e) => setNewUser({ ...newUser, username: e.target.value })}
-                            className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
-                            placeholder="Username"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                        <input
-                            type="text"
-                            value={newUser.password || ""}
-                            onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
-                            className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
-                            placeholder="Password"
-                        />
-                    </div>
-                    <div className="flex flex-col justify-center">
-                        <label className="flex items-center gap-2 cursor-pointer mt-6">
-                            <input
-                                type="checkbox"
-                                checked={newUser.isAdmin || false}
-                                onChange={(e) => setNewUser({ ...newUser, isAdmin: e.target.checked })}
-                                className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                            />
-                            <span className="text-sm font-medium text-gray-700">Is Admin</span>
-                        </label>
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
-                        <input
-                            type="text"
-                            required
-                            value={newUser.name || ""}
-                            onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
-                            className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
-                            placeholder="Name"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Department</label>
-                        <select
-                            value={newUser.departmentId}
-                            onChange={(e) => setNewUser({ ...newUser, departmentId: e.target.value })}
-                            className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
-                            required
-                        >
-                            <option value="">Select Dept</option>
-                            {departments.map((dept) => (
-                                <option key={dept.id} value={dept.id}>
-                                    {dept.name}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
-                        <input
-                            type="date"
-                            required
-                            value={newUser.startDate ? newUser.startDate.split('T')[0] : ""}
-                            onChange={(e) => setNewUser({ ...newUser, startDate: e.target.value })}
-                            className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
-                        />
-                    </div>
-                    <div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                            <input
-                                type="text"
-                                value={newUser.password || ""}
-                                onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
-                                className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
-                                placeholder={isEditing ? "(Leave blank to keep)" : "Password"}
-                            />
+                        <h3 className="text-sm font-medium text-gray-500 mb-3 uppercase tracking-wider border-t pt-4">Account Credentials</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                            {isEditing && (
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">ID</label>
+                                    <input
+                                        type="text"
+                                        required
+                                        disabled
+                                        value={newUser.am || ""}
+                                        className="w-full rounded-md border-gray-300 shadow-sm bg-gray-100 text-gray-500 cursor-not-allowed border p-2"
+                                    />
+                                </div>
+                            )}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                                <input
+                                    type="text"
+                                    value={newUser.username || ""}
+                                    onChange={(e) => setNewUser({ ...newUser, username: e.target.value })}
+                                    className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
+                                    placeholder="Username"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                                <input
+                                    type="text"
+                                    value={newUser.password || ""}
+                                    onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+                                    className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
+                                    placeholder={isEditing ? "(Leave blank to keep)" : "Password"}
+                                />
+                            </div>
+                            <div className="flex items-center gap-4 h-10 pb-2">
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={newUser.isAdmin || false}
+                                        onChange={(e) => setNewUser({ ...newUser, isAdmin: e.target.checked })}
+                                        className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                    />
+                                    <span className="text-sm font-medium text-gray-700">Is Admin</span>
+                                </label>
+
+                                <div className="flex gap-2 ml-4">
+                                    <button
+                                        type="submit"
+                                        className="flex items-center justify-center gap-1 bg-blue-600 text-white px-3 py-1.5 text-sm rounded-md hover:bg-blue-700 transition-colors"
+                                    >
+                                        {isEditing ? "Update" : <><Plus className="h-3 w-3" /> Add</>}
+                                    </button>
+                                    {isEditing && (
+                                        <button
+                                            type="button"
+                                            onClick={handleCancelEdit}
+                                            className="px-3 py-1.5 text-sm border border-gray-300 rounded-md hover:bg-gray-50 text-gray-700"
+                                        >
+                                            Cancel
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
                         </div>
-                        <input
-                            type="date"
-                            value={newUser.endDate ? newUser.endDate.split('T')[0] : ""}
-                            onChange={(e) => setNewUser({ ...newUser, endDate: e.target.value })}
-                            className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
-                        />
-                    </div>
-                    <div className="flex gap-2">
-                        <button
-                            type="submit"
-                            className="flex-1 flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
-                        >
-                            {isEditing ? "Update" : <><Plus className="h-4 w-4" /> Add</>}
-                        </button>
-                        {isEditing && (
-                            <button
-                                type="button"
-                                onClick={handleCancelEdit}
-                                className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 text-gray-700"
-                            >
-                                Cancel
-                            </button>
-                        )}
                     </div>
                 </form>
             </div>
@@ -223,6 +241,7 @@ export function UserManagement() {
                             <th className="p-4">Surname</th>
                             <th className="p-4">Name</th>
                             <th className="p-4">Department</th>
+                            <th className="p-4">Role</th>
                             <th className="p-4">Start Date</th>
                             <th className="p-4">End Date</th>
                             <th className="p-4 text-right">Actions</th>
@@ -235,6 +254,15 @@ export function UserManagement() {
                                 <td className="p-4">{user.surname}</td>
                                 <td className="p-4">{user.name}</td>
                                 <td className="p-4">{user.department?.name}</td>
+                                <td className="p-4">
+                                    {user.isAdmin ? (
+                                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
+                                            Admin
+                                        </span>
+                                    ) : (
+                                        <span className="text-gray-500">User</span>
+                                    )}
+                                </td>
                                 <td className="p-4 text-gray-600">
                                     {user.startDate ? new Date(user.startDate).toLocaleDateString() : "-"}
                                 </td>
@@ -261,7 +289,7 @@ export function UserManagement() {
                         ))}
                         {users.length === 0 && (
                             <tr>
-                                <td colSpan={5} className="p-8 text-center text-gray-500">
+                                <td colSpan={8} className="p-8 text-center text-gray-500">
                                     No users found. Add one above.
                                 </td>
                             </tr>

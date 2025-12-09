@@ -5,7 +5,14 @@ import Link from "next/link";
 import { Users, Calendar, UserCircle, LogOut } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 
-export function Navbar() {
+interface NavbarProps {
+    user?: {
+        isAdmin: boolean;
+        name?: string;
+    } | null;
+}
+
+export function Navbar({ user }: NavbarProps) {
     const router = useRouter();
 
     const pathname = usePathname();
@@ -66,13 +73,15 @@ export function Navbar() {
                             <UserCircle className="h-4 w-4" />
                             Portal
                         </Link>
-                        <Link
-                            href="/admin"
-                            className="flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors"
-                        >
-                            <Users className="h-4 w-4" />
-                            Admin
-                        </Link>
+                        {user?.isAdmin && (
+                            <Link
+                                href="/admin"
+                                className="flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors"
+                            >
+                                <Users className="h-4 w-4" />
+                                Admin
+                            </Link>
+                        )}
                         <button
                             onClick={handleLogout}
                             className="flex items-center gap-2 text-sm font-medium text-red-600 hover:text-red-700 transition-colors border-l pl-6 ml-2"
