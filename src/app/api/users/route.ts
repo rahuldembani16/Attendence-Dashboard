@@ -16,7 +16,7 @@ export async function GET() {
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { surname, name, departmentId, startDate, endDate } = body;
+        const { surname, name, departmentId, startDate, endDate, username, password, isAdmin } = body;
 
         // Find the highest current AM (ID)
         const users = await prisma.user.findMany({
@@ -33,6 +33,11 @@ export async function POST(request: Request) {
 
         const nextId = (maxId + 1).toString();
 
+        // Generate default username if not provided: first letter of name + surname
+        const defaultUsername = `${name.charAt(0).toLowerCase()}${surname.toLowerCase()}`.replace(/\s+/g, '');
+        // We might want to ensure uniqueness here, but for now we'll rely on the input or this simple logic
+        // Ideally the frontend should provide unique usernames
+
         const user = await prisma.user.create({
             data: {
                 am: nextId,
@@ -41,10 +46,14 @@ export async function POST(request: Request) {
                 departmentId,
                 startDate: startDate ? new Date(startDate) : new Date(),
                 endDate: endDate ? new Date(endDate) : null,
+                username: username || defaultUsername,
+                password: password || "password123", // Default password
+                isAdmin: isAdmin || false,
             },
         });
         return NextResponse.json(user);
     } catch (error) {
+        console.error("Failed to create user:", error);
         return NextResponse.json({ error: "Failed to create user" }, { status: 500 });
     }
 }
@@ -70,7 +79,7 @@ export async function DELETE(request: Request) {
 export async function PATCH(request: Request) {
     try {
         const body = await request.json();
-        const { id, am, surname, name, departmentId, startDate, endDate } = body;
+        const { id, am, surname, name, departmentId, startDate, endDate, username, password, isAdmin } = body;
 
         if (!id) {
             return NextResponse.json({ error: "ID is required" }, { status: 400 });
@@ -85,6 +94,9 @@ export async function PATCH(request: Request) {
                 departmentId,
                 startDate: startDate ? new Date(startDate) : undefined,
                 endDate: endDate ? new Date(endDate) : null,
+                username,
+                password,
+                isAdmin,
             },
         });
         return NextResponse.json(user);

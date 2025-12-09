@@ -10,6 +10,9 @@ export type User = {
     am: string;
     surname: string;
     name: string;
+    username: string;
+    password?: string; // Optional for display, required for creation
+    isAdmin: boolean;
     department: Department;
     departmentId: string;
     startDate: string;

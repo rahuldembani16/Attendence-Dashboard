@@ -110,6 +110,37 @@ export function UserManagement() {
                         />
                     </div>
                     <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                        <input
+                            type="text"
+                            value={newUser.username || ""}
+                            onChange={(e) => setNewUser({ ...newUser, username: e.target.value })}
+                            className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
+                            placeholder="Username"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                        <input
+                            type="text"
+                            value={newUser.password || ""}
+                            onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+                            className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
+                            placeholder="Password"
+                        />
+                    </div>
+                    <div className="flex flex-col justify-center">
+                        <label className="flex items-center gap-2 cursor-pointer mt-6">
+                            <input
+                                type="checkbox"
+                                checked={newUser.isAdmin || false}
+                                onChange={(e) => setNewUser({ ...newUser, isAdmin: e.target.checked })}
+                                className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                            />
+                            <span className="text-sm font-medium text-gray-700">Is Admin</span>
+                        </label>
+                    </div>
+                    <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
                         <input
                             type="text"
@@ -147,7 +178,16 @@ export function UserManagement() {
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                            <input
+                                type="text"
+                                value={newUser.password || ""}
+                                onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+                                className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
+                                placeholder={isEditing ? "(Leave blank to keep)" : "Password"}
+                            />
+                        </div>
                         <input
                             type="date"
                             value={newUser.endDate ? newUser.endDate.split('T')[0] : ""}

@@ -54,35 +54,41 @@ async function main() {
     const marketing = await prisma.department.upsert({ where: { name: 'Marketing' }, update: {}, create: { name: 'Marketing' } });
 
     // Create Users
+    // Admin User
     await prisma.user.upsert({
         where: { am: '8818' },
-        update: {},
+        update: {
+            username: 'rdembani',
+            password: 'password123',
+            isAdmin: true,
+        },
         create: {
             am: '8818',
             surname: 'Dembani',
             name: 'Rachid',
             departmentId: rd.id,
+            username: 'rdembani',
+            password: 'password123',
+            isAdmin: true,
         },
     });
 
+    // Regular User
     await prisma.user.upsert({
         where: { am: '1001' },
-        update: {},
+        update: {
+            username: 'jdoe',
+            password: 'password123',
+            isAdmin: false,
+        },
         create: {
             am: '1001',
             surname: 'Doe',
             name: 'John',
             departmentId: sales.id,
-        },
-    });
-
-    // Create Admin
-    await prisma.admin.upsert({
-        where: { username: 'admin' },
-        update: {},
-        create: {
-            username: 'admin',
-            password: 'SingularR&DAdmin@!@',
+            username: 'jdoe',
+            password: 'password123',
+            isAdmin: false,
         },
     });
 

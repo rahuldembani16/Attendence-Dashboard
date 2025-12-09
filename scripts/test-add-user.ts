@@ -18,6 +18,8 @@ async function main() {
                 am: "9999",
                 surname: "Test",
                 name: "User",
+                username: "testuser",
+                password: "password123",
                 departmentId: dept.id,
                 startDate: new Date(),
             }

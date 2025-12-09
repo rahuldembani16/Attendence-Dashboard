@@ -2,27 +2,48 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export function middleware(request: NextRequest) {
-    // Check if the request is for the admin section
-    if (request.nextUrl.pathname.startsWith("/admin")) {
-        // Exclude the login page and API routes from protection
-        // We protect the API routes separately if needed, but for now let's just protect the UI
-        if (
-            request.nextUrl.pathname === "/admin/login" ||
-            request.nextUrl.pathname.startsWith("/api")
-        ) {
-            return NextResponse.next();
+    const pathname = request.nextUrl.pathname;
+
+    // Public paths
+    if (
+        pathname === "/login" ||
+        pathname.startsWith("/_next") ||
+        pathname.startsWith("/api/auth") ||
+        pathname === "/favicon.ico"
+    ) {
+        return NextResponse.next();
+    }
+
+    const sessionCookie = request.cookies.get("session");
+
+    // Redirect to login if no session
+    if (!sessionCookie) {
+        return NextResponse.redirect(new URL("/login", request.url));
+    }
+
+    try {
+        const session = JSON.parse(sessionCookie.value);
+
+        // Admin protection
+        if (pathname.startsWith("/admin")) {
+            if (!session.isAdmin) {
+                // Redirect non-admins to dashboard
+                return NextResponse.redirect(new URL("/", request.url));
+            }
         }
 
-        const adminSession = request.cookies.get("admin_session");
+        // Prevent logged-in users from accessing login page (already handled by logic above since /login is public, 
+        // but if they visit it manually, we might want to redirect them away? 
+        // Usually middleware handles protected routes, logic for redirecting logged-in users away from /login is often done in the page or here if matched)
 
-        if (!adminSession) {
-            return NextResponse.redirect(new URL("/admin/login", request.url));
-        }
+    } catch (e) {
+        // Invalid session
+        return NextResponse.redirect(new URL("/login", request.url));
     }
 
     return NextResponse.next();
 }
 
 export const config = {
-    matcher: "/admin/:path*",
+    matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
 };
