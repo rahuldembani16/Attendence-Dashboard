@@ -86,7 +86,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(user),
             });
-            if (!res.ok) throw new Error("Failed to add user");
+            if (!res.ok) {
+                const data = await res.json();
+                throw new Error(data.error || "Failed to add user");
+            }
             return res.json();
         },
         onSuccess: () => queryClient.invalidateQueries({ queryKey: ["users"] }),
@@ -99,7 +102,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(user),
             });
-            if (!res.ok) throw new Error("Failed to update user");
+            if (!res.ok) {
+                const data = await res.json();
+                throw new Error(data.error || "Failed to update user");
+            }
             return res.json();
         },
         onSuccess: () => queryClient.invalidateQueries({ queryKey: ["users"] }),

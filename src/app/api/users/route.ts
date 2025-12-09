@@ -34,9 +34,17 @@ export async function POST(request: Request) {
         const nextId = (maxId + 1).toString();
 
         // Generate default username if not provided: first letter of name + surname
-        const defaultUsername = `${name.charAt(0).toLowerCase()}${surname.toLowerCase()}`.replace(/\s+/g, '');
-        // We might want to ensure uniqueness here, but for now we'll rely on the input or this simple logic
-        // Ideally the frontend should provide unique usernames
+        const baseUsername = username || `${name.charAt(0).toLowerCase()}${surname.toLowerCase()}`.replace(/\s+/g, '');
+        const finalUsername = baseUsername;
+
+        // Check for existing user with this username
+        const existingUser = await prisma.user.findUnique({
+            where: { username: finalUsername },
+        });
+
+        if (existingUser) {
+            return NextResponse.json({ error: "Username already exists." }, { status: 400 });
+        }
 
         const user = await prisma.user.create({
             data: {
@@ -46,7 +54,7 @@ export async function POST(request: Request) {
                 departmentId,
                 startDate: startDate ? new Date(startDate) : new Date(),
                 endDate: endDate ? new Date(endDate) : null,
-                username: username || defaultUsername,
+                username: finalUsername,
                 password: password || "password123", // Default password
                 isAdmin: isAdmin || false,
             },

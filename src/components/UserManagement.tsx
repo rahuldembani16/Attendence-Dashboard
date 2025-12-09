@@ -16,9 +16,18 @@ export function UserManagement() {
 
     const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
+    const [error, setError] = useState<string | null>(null);
+
     const handleAddUser = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (newUser.surname && newUser.name && newUser.departmentId && newUser.startDate) {
+        setError(null);
+
+        if (!newUser.surname || !newUser.name || !newUser.departmentId || !newUser.startDate) {
+            setError("Please fill in all required fields (Surname, Name, Department, Start Date).");
+            return;
+        }
+
+        try {
             if (isEditing && newUser.id) {
                 const updateData: Partial<User> = {
                     id: newUser.id,
@@ -51,6 +60,9 @@ export function UserManagement() {
                 });
             }
             setNewUser({ departmentId: "", am: "", surname: "", name: "", startDate: "", endDate: "" });
+        } catch (err: any) {
+            console.error("Failed to save user:", err);
+            setError(err.message || "Failed to save user. Please try again.");
         }
     };
 
@@ -99,6 +111,11 @@ export function UserManagement() {
                 <h2 className="text-lg font-semibold text-gray-800 mb-4">
                     {isEditing ? "Edit Employee" : "Add New Employee"}
                 </h2>
+                {error && (
+                    <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+                        <span className="block sm:inline">{error}</span>
+                    </div>
+                )}
                 <form onSubmit={handleAddUser} className="space-y-6">
                     {/* Personal & Job Details */}
                     <div>
@@ -240,6 +257,7 @@ export function UserManagement() {
                             <th className="p-4">ID</th>
                             <th className="p-4">Surname</th>
                             <th className="p-4">Name</th>
+                            <th className="p-4">Username</th>
                             <th className="p-4">Department</th>
                             <th className="p-4">Role</th>
                             <th className="p-4">Start Date</th>
@@ -253,6 +271,7 @@ export function UserManagement() {
                                 <td className="p-4 font-medium">{user.am}</td>
                                 <td className="p-4">{user.surname}</td>
                                 <td className="p-4">{user.name}</td>
+                                <td className="p-4 text-gray-600">{user.username}</td>
                                 <td className="p-4">{user.department?.name}</td>
                                 <td className="p-4">
                                     {user.isAdmin ? (
@@ -289,7 +308,7 @@ export function UserManagement() {
                         ))}
                         {users.length === 0 && (
                             <tr>
-                                <td colSpan={8} className="p-8 text-center text-gray-500">
+                                <td colSpan={9} className="p-8 text-center text-gray-500">
                                     No users found. Add one above.
                                 </td>
                             </tr>
