@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Users, Calendar, UserCircle, LogOut } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
+import logo from "../assets/logo.png";
 
 interface NavbarProps {
     user?: {
@@ -24,7 +25,7 @@ export function Navbar({ user }: NavbarProps) {
                     <div className="flex justify-between h-16 items-center">
                         <div className="flex items-center gap-2">
                             <Image
-                                src="/logo.png"
+                                src={logo}
                                 alt="SingularLogic Logo"
                                 width={180}
                                 height={40}
@@ -50,7 +51,7 @@ export function Navbar({ user }: NavbarProps) {
                 <div className="flex justify-between h-16 items-center">
                     <div className="flex items-center gap-2">
                         <Image
-                            src="/logo.png"
+                            src={logo}
                             alt="SingularLogic Logo"
                             width={180}
                             height={40}
