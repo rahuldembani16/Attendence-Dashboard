@@ -1,4 +1,5 @@
 const { PrismaClient } = require('@prisma/client');
+const bcrypt = require('bcryptjs');
 const prisma = new PrismaClient();
 
 async function main() {
@@ -54,12 +55,14 @@ async function main() {
     const marketing = await prisma.department.upsert({ where: { name: 'Marketing' }, update: {}, create: { name: 'Marketing' } });
 
     // Create Users
+    const passwordHash = await bcrypt.hash('password123', 10);
+
     // Admin User
     await prisma.user.upsert({
         where: { am: '8818' },
         update: {
             username: 'rdembani',
-            password: 'password123',
+            password: passwordHash,
             isAdmin: true,
         },
         create: {
@@ -68,7 +71,7 @@ async function main() {
             name: 'Rachid',
             departmentId: rd.id,
             username: 'rdembani',
-            password: 'password123',
+            password: passwordHash,
             isAdmin: true,
         },
     });
@@ -78,7 +81,7 @@ async function main() {
         where: { am: '1001' },
         update: {
             username: 'jdoe',
-            password: 'password123',
+            password: passwordHash,
             isAdmin: false,
         },
         create: {
@@ -87,7 +90,7 @@ async function main() {
             name: 'John',
             departmentId: sales.id,
             username: 'jdoe',
-            password: 'password123',
+            password: passwordHash,
             isAdmin: false,
         },
     });

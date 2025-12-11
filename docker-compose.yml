@@ -5,9 +5,9 @@ services:
     image: postgres:15-alpine
     container_name: dashboard-db
     environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: FSg8HiQ4QyqG1L1b
-      POSTGRES_DB: dashboardDB
+      POSTGRES_USER: ${POSTGRES_USER:-admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-FSg8HiQ4QyqG1L1b}
+      POSTGRES_DB: ${POSTGRES_DB:-dashboardDB}
     ports:
       - "5432:5432"
     volumes:
@@ -20,7 +20,9 @@ services:
       dockerfile: Dockerfile
     container_name: dashboard-app
     environment:
-      DATABASE_URL: postgres://admin:FSg8HiQ4QyqG1L1b@postgres:5432/dashboardDB
+      DATABASE_URL: ${DATABASE_URL:-postgres://admin:FSg8HiQ4QyqG1L1b@postgres:5432/dashboardDB}
+      JWT_SECRET: ${JWT_SECRET:-default_secret_please_change}
+      NODE_ENV: production
     ports:
       - "3000:3000"
     depends_on:

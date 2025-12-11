@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { cookies } from "next/headers";
+import bcrypt from "bcryptjs";
+import { SignJWT } from "jose";
 
 export async function POST(request: Request) {
     try {
@@ -15,22 +17,28 @@ export async function POST(request: Request) {
             where: { username },
         });
 
-        if (!user || user.password !== password) {
+        if (!user || !(await bcrypt.compare(password, user.password))) {
             return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
         }
 
-        const cookieStore = await cookies();
-        const sessionData = JSON.stringify({
+        const secret = new TextEncoder().encode(process.env.JWT_SECRET || "default_secret_please_change");
+        const token = await new SignJWT({
             userId: user.id,
             isAdmin: user.isAdmin,
             name: user.name,
-            surname: user.surname
-        });
+            surname: user.surname,
+        })
+            .setProtectedHeader({ alg: "HS256" })
+            .setIssuedAt()
+            .setExpirationTime("24h")
+            .sign(secret);
+
+        const cookieStore = await cookies();
 
         // Set session cookie
-        cookieStore.set("session", sessionData, {
+        cookieStore.set("session", token, {
             httpOnly: true,
-            secure: false, // process.env.NODE_ENV === "production",
+            secure: process.env.NODE_ENV === "production",
             sameSite: "strict",
             path: "/",
             maxAge: 60 * 60 * 24, // 1 day

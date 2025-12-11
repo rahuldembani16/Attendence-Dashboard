@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { AppProvider } from "@/context/AppContext";
 import { Providers } from "@/components/Providers";
 import { cookies } from "next/headers";
+import { jwtVerify } from "jose";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -26,9 +27,11 @@ export default async function RootLayout({
 
   if (sessionCookie?.value) {
     try {
-      user = JSON.parse(sessionCookie.value);
+      const secret = new TextEncoder().encode(process.env.JWT_SECRET || "default_secret_please_change");
+      const { payload } = await jwtVerify(sessionCookie.value, secret);
+      user = payload as any;
     } catch (e) {
-      console.error("Failed to parse session cookie", e);
+      console.error("Failed to verify session cookie", e);
     }
   }
 

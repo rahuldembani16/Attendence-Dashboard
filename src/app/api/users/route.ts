@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import bcrypt from "bcryptjs";
 
 export async function GET() {
     try {
@@ -55,7 +56,7 @@ export async function POST(request: Request) {
                 startDate: startDate ? new Date(startDate) : new Date(),
                 endDate: endDate ? new Date(endDate) : null,
                 username: finalUsername,
-                password: password || "password123", // Default password
+                password: await bcrypt.hash(password || "password123", 10), // Default password hashed
                 isAdmin: isAdmin || false,
             },
         });
@@ -103,7 +104,7 @@ export async function PATCH(request: Request) {
                 startDate: startDate ? new Date(startDate) : undefined,
                 endDate: endDate ? new Date(endDate) : null,
                 username,
-                password,
+                password: password ? await bcrypt.hash(password, 10) : undefined,
                 isAdmin,
             },
         });
