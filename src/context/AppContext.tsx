@@ -14,6 +14,7 @@ interface AppContextType {
     updateUser: (user: Partial<User>) => Promise<void>;
     deleteUser: (id: string) => Promise<void>;
     updateAttendance: (record: Partial<AttendanceRecord>) => Promise<void>;
+    deleteAttendance: (userId: string, date: string) => Promise<void>;
     getAttendance: (userId: string, date: string) => string | undefined;
     addCategory: (category: Partial<Category>) => Promise<void>;
     deleteCategory: (id: string) => Promise<void>;
@@ -132,6 +133,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         onSuccess: () => queryClient.invalidateQueries({ queryKey: ["attendance"] }),
     });
 
+    const deleteAttendanceMutation = useMutation({
+        mutationFn: async ({ userId, date }: { userId: string; date: string }) => {
+            const res = await fetch(`/api/attendance?userId=${userId}&date=${date}`, {
+                method: "DELETE",
+            });
+            if (!res.ok) throw new Error("Failed to delete attendance");
+            return res.json();
+        },
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ["attendance"] }),
+    });
+
     const addCategoryMutation = useMutation({
         mutationFn: async (category: Partial<Category>) => {
             const res = await fetch("/api/categories", {
@@ -210,6 +222,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
                 updateUser: updateUserMutation.mutateAsync,
                 deleteUser: deleteUserMutation.mutateAsync,
                 updateAttendance: updateAttendanceMutation.mutateAsync,
+                deleteAttendance: (userId, date) => deleteAttendanceMutation.mutateAsync({ userId, date }),
                 getAttendance,
                 addCategory: addCategoryMutation.mutateAsync,
                 deleteCategory: deleteCategoryMutation.mutateAsync,

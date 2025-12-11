@@ -10,7 +10,7 @@ import { ChevronLeft, ChevronRight, ArrowLeft } from "lucide-react";
 export default function UserAttendancePage() {
     const params = useParams();
     const router = useRouter();
-    const { users, categories, holidays, getAttendance, updateAttendance } = useApp();
+    const { users, categories, holidays, getAttendance, updateAttendance, deleteAttendance } = useApp();
     const [currentDate, setCurrentDate] = useState(new Date());
 
     const user = users.find((u) => u.id === params.id);
@@ -58,13 +58,12 @@ export default function UserAttendancePage() {
 
     const handleStatusClick = (date: string) => {
         const currentCode = getAttendance(user.id, date);
-        const currentCategory = categories.find(c => c.code === currentCode);
 
         // Find next category
         let nextCategory;
         if (!currentCode) {
-            // Default to "On Site" (OS) if available, otherwise first category
-            nextCategory = categories.find(c => c.code === "OS") || categories[0];
+            // Default to first category
+            nextCategory = categories[0];
         } else {
             const currentIndex = categories.findIndex(c => c.code === currentCode);
             const nextIndex = (currentIndex + 1) % (categories.length + 1);
@@ -74,7 +73,7 @@ export default function UserAttendancePage() {
         if (nextCategory) {
             updateAttendance({ userId: user.id, date, categoryId: nextCategory.id });
         } else {
-            updateAttendance({ userId: user.id, date, categoryId: categories[0].id });
+            deleteAttendance(user.id, date);
         }
     };
 

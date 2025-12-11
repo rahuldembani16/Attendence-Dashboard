@@ -12,7 +12,7 @@ interface AttendanceGridProps {
 }
 
 export function AttendanceGrid({ currentDate, setCurrentDate }: AttendanceGridProps) {
-    const { users, categories, holidays, getAttendance, updateAttendance } = useApp();
+    const { users, categories, holidays, getAttendance, updateAttendance, deleteAttendance } = useApp();
 
     // Filter active categories for selection and legend
     const activeCategories = categories.filter(c => c.isActive !== false); // Handle undefined as true for legacy
@@ -37,8 +37,8 @@ export function AttendanceGrid({ currentDate, setCurrentDate }: AttendanceGridPr
         // Find next category from ACTIVE categories only
         let nextCategory;
         if (!currentCode) {
-            // Default to "On Site" (OS) if available and active, otherwise first active category
-            nextCategory = activeCategories.find(c => c.code === "OS") || activeCategories[0];
+            // Default to first active category (usually BT based on order)
+            nextCategory = activeCategories[0];
         } else {
             const currentIndex = activeCategories.findIndex(c => c.code === currentCode);
 
@@ -55,11 +55,7 @@ export function AttendanceGrid({ currentDate, setCurrentDate }: AttendanceGridPr
             updateAttendance({ userId, date, categoryId: nextCategory.id });
         } else {
             // Clear status (cycle to empty)
-            // If we want to loop back to start immediately without empty state:
-            // updateAttendance({ userId, date, categoryId: activeCategories[0].id });
-
-            // Current implementation: Allow clearing (undefined)
-            updateAttendance({ userId, date, categoryId: activeCategories[0].id });
+            deleteAttendance(userId, date);
         }
     };
 

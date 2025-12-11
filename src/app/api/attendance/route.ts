@@ -76,3 +76,28 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: "Failed to update attendance" }, { status: 500 });
     }
 }
+
+export async function DELETE(request: Request) {
+    try {
+        const { searchParams } = new URL(request.url);
+        const userId = searchParams.get("userId");
+        const date = searchParams.get("date");
+
+        if (!userId || !date) {
+            return NextResponse.json({ error: "Missing userId or date" }, { status: 400 });
+        }
+
+        await prisma.attendance.delete({
+            where: {
+                userId_date: {
+                    userId,
+                    date: new Date(date),
+                },
+            },
+        });
+
+        return NextResponse.json({ success: true });
+    } catch (error) {
+        return NextResponse.json({ error: "Failed to delete attendance" }, { status: 500 });
+    }
+}
