@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 export async function GET() {
     try {
         const holidays = await prisma.holiday.findMany({
-            orderBy: { date: "asc" },
+            orderBy: { createdAt: "desc" },
         });
         return NextResponse.json(holidays);
     } catch (error) {

@@ -14,15 +14,30 @@ export default function HolidaysPage() {
     });
     const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
-    const handleAdd = (e: React.FormEvent) => {
+    // Pagination state
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
+
+    // Calculate pagination
+    const totalPages = Math.ceil(holidays.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const currentHolidays = holidays.slice(startIndex, startIndex + itemsPerPage);
+
+    const handlePageChange = (page: number) => {
+        setCurrentPage(page);
+    };
+
+    const handleAdd = async (e: React.FormEvent) => {
         e.preventDefault();
         if (newHoliday.date && newHoliday.description) {
-            addHoliday(newHoliday);
+            await addHoliday(newHoliday);
             setNewHoliday({
                 date: "",
                 description: "",
                 isRecurring: false,
             });
+            // Reset to first page to see the new (newest) holiday
+            setCurrentPage(1);
         }
     };
 
@@ -30,6 +45,10 @@ export default function HolidaysPage() {
         if (deleteConfirmId) {
             await deleteHoliday(deleteConfirmId);
             setDeleteConfirmId(null);
+            // Adjust page if empty
+            if (currentHolidays.length === 1 && currentPage > 1) {
+                setCurrentPage(currentPage - 1);
+            }
         }
     };
 
@@ -89,7 +108,7 @@ export default function HolidaysPage() {
                         </tr>
                     </thead>
                     <tbody className="divide-y">
-                        {holidays.map((holiday) => (
+                        {currentHolidays.map((holiday) => (
                             <tr key={holiday.id} className="hover:bg-gray-50">
                                 <td className="p-4 font-medium">
                                     {format(new Date(holiday.date), "PPP")}
@@ -114,6 +133,47 @@ export default function HolidaysPage() {
                         )}
                     </tbody>
                 </table>
+
+                {/* Pagination Controls */}
+                {totalPages > 1 && (
+                    <div className="flex items-center justify-between px-4 py-3 border-t bg-gray-50">
+                        <div className="text-sm text-gray-500">
+                            Showing <span className="font-medium">{startIndex + 1}</span> to <span className="font-medium">{Math.min(startIndex + itemsPerPage, holidays.length)}</span> of <span className="font-medium">{holidays.length}</span> results
+                        </div>
+                        <div className="flex gap-2">
+                            <button
+                                onClick={() => handlePageChange(currentPage - 1)}
+                                disabled={currentPage === 1}
+                                className="px-3 py-1 border rounded text-sm bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                Previous
+                            </button>
+                            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                                <button
+                                    key={page}
+                                    onClick={() => handlePageChange(page)}
+                                    // Hacky way to use cn here if imported, but simpler to just use standard classes as 'cn' is not imported in original snippet above?
+                                    // Actually looking at context, 'cn' is NOT imported in the original file view I saw earlier? 
+                                    // Wait, I should verify imports. The original file view showed imports.
+                                    // Let's re-read imports or just use template literal for safety if I am not sure 'cn' is imported.
+                                    // The view_file output (Step 318) shows NO 'cn' import.
+                                    // So I should stick to template literals or simple class logic.
+                                    className={`px-3 py-1 border rounded text-sm transition-colors ${currentPage === page ? "bg-blue-600 text-white border-blue-600" : "bg-white hover:bg-gray-50"
+                                        }`}
+                                >
+                                    {page}
+                                </button>
+                            ))}
+                            <button
+                                onClick={() => handlePageChange(currentPage + 1)}
+                                disabled={currentPage === totalPages}
+                                className="px-3 py-1 border rounded text-sm bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                Next
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* Confirmation Modal */}
