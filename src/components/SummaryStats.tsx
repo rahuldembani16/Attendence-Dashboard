@@ -12,7 +12,7 @@ interface SummaryStatsProps {
 import { startOfMonth, endOfMonth, eachDayOfInterval } from "date-fns";
 
 export function SummaryStats({ currentDate }: SummaryStatsProps) {
-    const { users, categories, getAttendance } = useApp();
+    const { users, categories, holidays, getAttendance } = useApp();
 
     const daysInMonth = eachDayOfInterval({
         start: startOfMonth(currentDate),
@@ -22,10 +22,22 @@ export function SummaryStats({ currentDate }: SummaryStatsProps) {
     // Calculate stats for the whole month
     const activeCategories = categories.filter(c => c.isActive !== false);
 
+    const isHoliday = (date: Date) => {
+        const dateStr = format(date, "yyyy-MM-dd");
+        return holidays.some((h) => h.date.split("T")[0] === dateStr);
+    };
+
     const stats = activeCategories.map(category => {
         let count = 0;
         users.forEach(user => {
             daysInMonth.forEach(day => {
+                // Skip holidays/weekends? User said "holiday".
+                // Let's safe-guard against holidays specifically as requested.
+                // Assuming weekends are also generally not counted if not schedulable, but user focused on holidays.
+                // To be safe and consistent with "blocked", we should probably restrict it.
+                // However, "isBlocked" is not available here. Let's just implement isHoliday for now as requested.
+                if (isHoliday(day)) return;
+
                 const dateStr = format(day, "yyyy-MM-dd");
                 if (getAttendance(user.id, dateStr) === category.code) {
                     count++;

@@ -170,6 +170,7 @@ export function AttendanceGrid({ currentDate, setCurrentDate }: AttendanceGridPr
                             {daysInMonth.map((day) => {
                                 const dateStr = format(day, "yyyy-MM-dd");
                                 const countOS = users.reduce((acc, user) => {
+                                    if (isBlocked(day)) return acc;
                                     return getAttendance(user.id, dateStr) === "OS" ? acc + 1 : acc;
                                 }, 0);
 
