@@ -5,7 +5,7 @@ import { AttendanceGrid } from "@/components/AttendanceGrid";
 import { SummaryStats } from "@/components/SummaryStats";
 
 export default function Home() {
-  const [currentDate, setCurrentDate] = useState(new Date(2025, 11, 1)); // Dec 2025
+  const [currentDate, setCurrentDate] = useState(new Date());
 
   return (
     <div className="space-y-8">
