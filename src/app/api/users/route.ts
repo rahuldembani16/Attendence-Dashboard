@@ -5,7 +5,7 @@ import bcrypt from "bcryptjs";
 export async function GET() {
     try {
         const users = await prisma.user.findMany({
-            orderBy: { surname: "asc" },
+            orderBy: { createdAt: "desc" },
             include: { department: true },
         });
         return NextResponse.json(users);
@@ -17,22 +17,21 @@ export async function GET() {
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { surname, name, departmentId, startDate, endDate, username, password, isAdmin } = body;
+        const { am, surname, name, departmentId, startDate, endDate, username, password, isAdmin } = body;
 
-        // Find the highest current AM (ID)
-        const users = await prisma.user.findMany({
-            select: { am: true },
+        if (!am) {
+            return NextResponse.json({ error: "Employee ID (AM) is required." }, { status: 400 });
+        }
+
+        const nextId = am;
+
+        // Check if provided AM exists
+        const existingAm = await prisma.user.findUnique({
+            where: { am: nextId },
         });
-
-        let maxId = 0;
-        users.forEach((user) => {
-            const num = parseInt(user.am, 10);
-            if (!isNaN(num) && num > maxId) {
-                maxId = num;
-            }
-        });
-
-        const nextId = (maxId + 1).toString();
+        if (existingAm) {
+            return NextResponse.json({ error: "Employee ID (AM) already exists." }, { status: 400 });
+        }
 
         // Generate default username if not provided: first letter of name + surname
         const baseUsername = username || `${name.charAt(0).toLowerCase()}${surname.toLowerCase()}`.replace(/\s+/g, '');
