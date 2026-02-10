@@ -1,4 +1,4 @@
-# 🏢 Lobera Solutions — Attendance Dashboard
+# 🏢 Attendance Dashboard
 
 A full-featured **employee attendance management system**. It enables HR managers and department heads to track daily employee attendance across departments, manage users, define work-status categories, configure public holidays, and generate exportable reports — all through a modern, responsive web interface.
 
@@ -141,4 +141,4 @@ This starts both the **PostgreSQL** database and the **Next.js** application. Th
 
 ## 📄 License
 
-This project is proprietary software developed for **Lobera Solutions**.
+Email: rahool.dembani16@gmail.com.
