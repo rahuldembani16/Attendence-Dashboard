@@ -1,6 +1,6 @@
 # 🏢 Lobera Solutions — Attendance Dashboard
 
-A full-featured **employee attendance management system** built for [Lobera Solutions]. It enables HR managers and department heads to track daily employee attendance across departments, manage users, define work-status categories, configure public holidays, and generate exportable reports — all through a modern, responsive web interface.
+A full-featured **employee attendance management system**. It enables HR managers and department heads to track daily employee attendance across departments, manage users, define work-status categories, configure public holidays, and generate exportable reports — all through a modern, responsive web interface.
 
 ![Department Attendance Dashboard](public/screenshot.png)
 
