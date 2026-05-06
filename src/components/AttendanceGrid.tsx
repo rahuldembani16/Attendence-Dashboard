@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { useApp } from "@/context/AppContext";
 import { cn } from "@/lib/utils";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -12,7 +11,7 @@ interface AttendanceGridProps {
 }
 
 export function AttendanceGrid({ currentDate, setCurrentDate }: AttendanceGridProps) {
-    const { users, categories, holidays, getAttendance, updateAttendance, deleteAttendance } = useApp();
+    const { users, categories, holidays, getAttendance, updateAttendance, deleteAttendance, setCurrentMonth } = useApp();
 
     // Filter active categories for selection and legend
     const activeCategories = categories.filter(c => c.isActive !== false); // Handle undefined as true for legacy
@@ -67,13 +66,21 @@ export function AttendanceGrid({ currentDate, setCurrentDate }: AttendanceGridPr
                 </h2>
                 <div className="flex gap-2">
                     <button
-                        onClick={() => setCurrentDate(new Date(currentDate.setMonth(currentDate.getMonth() - 1)))}
+                        onClick={() => {
+                            const d = new Date(currentDate.setMonth(currentDate.getMonth() - 1));
+                            setCurrentDate(d);
+                            setCurrentMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
+                        }}
                         className="p-2 hover:bg-gray-100 rounded-full"
                     >
                         <ChevronLeft className="h-5 w-5" />
                     </button>
                     <button
-                        onClick={() => setCurrentDate(new Date(currentDate.setMonth(currentDate.getMonth() + 1)))}
+                        onClick={() => {
+                            const d = new Date(currentDate.setMonth(currentDate.getMonth() + 1));
+                            setCurrentDate(d);
+                            setCurrentMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
+                        }}
                         className="p-2 hover:bg-gray-100 rounded-full"
                     >
                         <ChevronRight className="h-5 w-5" />

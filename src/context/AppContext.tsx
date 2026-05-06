@@ -22,6 +22,8 @@ interface AppContextType {
     addHoliday: (holiday: Partial<Holiday>) => Promise<void>;
     deleteHoliday: (id: string) => Promise<void>;
     isLoading: boolean;
+    currentMonth: string;
+    setCurrentMonth: (month: string) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -49,11 +51,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         },
     });
 
-    // Fetch Attendance
+    // Fetch Attendance — scoped to current month to keep the payload small
+    const [currentMonth, setCurrentMonth] = React.useState(() => {
+        const now = new Date();
+        return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+    });
+
     const { data: attendance = [], isLoading: attendanceLoading } = useQuery({
-        queryKey: ["attendance"],
+        queryKey: ["attendance", currentMonth],
         queryFn: async () => {
-            const res = await fetch("/api/attendance");
+            const res = await fetch(`/api/attendance?month=${currentMonth}`);
             if (!res.ok) throw new Error("Failed to fetch attendance");
             return res.json();
         },
@@ -230,6 +237,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
                 addHoliday: addHolidayMutation.mutateAsync,
                 deleteHoliday: deleteHolidayMutation.mutateAsync,
                 isLoading: usersLoading || attendanceLoading || categoriesLoading || holidaysLoading || departmentsLoading,
+                currentMonth,
+                setCurrentMonth,
             }}
         >
             {children}
